@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cn4j3rabihf56"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_bue1h"]
-[ext_resource type="PackedScene" uid="uid://bcigrroowteo1" path="res://world_environment.tscn" id="2_j2ygk"]
+[ext_resource type="Environment" uid="uid://n1wgookhgjyh" path="res://world_environment.tres" id="2_8v1je"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_02rdm"]
 
@@ -13,6 +13,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_bue1h")
+point_radius = 5
+point_color = Color(0.92549, 0.0941176, 0.0823529, 1)
+line_width = 3
+line_color = Color(0.117822, 0.434153, 0.977816, 1)
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
@@ -23,6 +27,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_02rdm")
 
-[node name="WorldEnvironment" parent="." instance=ExtResource("2_j2ygk")]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("2_8v1je")
 
 [connection signal="gui_input" from="Panel" to="." method="_on_panel_gui_input"]

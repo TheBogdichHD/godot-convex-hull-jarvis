@@ -1,6 +1,5 @@
 extends Control
 
-
 @export_category("Point")
 @export var point_radius = 4
 @export var point_color = Color.RED
@@ -8,67 +7,91 @@ extends Control
 @export var line_width = 2
 @export var line_color = Color.BLUE
 
-
 var points = []
+var selected_point = -1
 
 
 func _draw():
-	for point in points:
-		draw_circle(point, point_radius, point_color)
-	
-	if points.size() < 3:
+	if points.size() < 2:
+		for point in points:
+			draw_circle(point, point_radius, point_color)
 		return
 	
-	var H = jarvismarch(points)
+	var convex_hull = jarvis_march()
 	
-	for i in range(H.size()-1):
-		draw_line(points[H[i]], points[H[i+1]], line_color, line_width)
+	for i in range(convex_hull.size()-1):
+		draw_line(points[convex_hull[i]], points[convex_hull[i+1]], line_color, line_width)
 	
-	draw_line(points[H[-1]], points[H[0]], line_color, line_width)
+	draw_line(points[convex_hull[-1]], points[convex_hull[0]], line_color, line_width)
 	
 	for point in points:
 		draw_circle(point, point_radius, point_color)
+
+
+func calculate_orientation(p, q, r):
+	return (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x)
+
+
+func jarvis_march():
+	var num_points = points.size()
+	
+	var point_indices = []
+	for i in range(num_points):
+		point_indices.append(i)
+	
+	for i in range(1, num_points):
+		if points[point_indices[i]].x < points[point_indices[0]].x:
+			var temp = point_indices[i]
+			point_indices[i] = point_indices[0]
+			point_indices[0] = temp
+	
+	var convex_hull = [point_indices[0]]
+	
+	point_indices.remove_at(0)
+	point_indices.append(convex_hull[0])
+	
+	while true:
+		var rightmost = 0
+		
+		for i in range(1, point_indices.size()):
+			if calculate_orientation(
+					points[convex_hull[-1]], 
+					points[point_indices[rightmost]], 
+					points[point_indices[i]]) < 0:
+				rightmost = i
+		
+		if point_indices[rightmost] == convex_hull[0]:
+			break
+		else:
+			convex_hull.append(point_indices[rightmost])
+			point_indices.remove_at(rightmost)
+	
+	return convex_hull
 
 
 func _on_panel_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
-		var mouse_pos = event.global_position
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			var mouse_pos = event.global_position
 			points.append(mouse_pos)
 			queue_redraw()
-
-
-func rotate(P, Q, R):
-	return (Q[0] - P[0]) * (R[1] - P[1]) - (Q[1] - P[1]) * (R[0] - P[0])
-
-
-func jarvismarch(A):
-	var n = A.size()
-	var P = []
-	for i in range(n):
-		P.append(i)
-	
-	# start point
-	for i in range(1, n):
-		if A[P[i]][0] < A[P[0]][0]:
-			var temp = P[i]
-			P[i] = P[0]
-			P[0] = temp
-	
-	var H = [P[0]]
-	P.remove_at(0)
-	P.append(H[0])
-
-	while true:
-		var right = 0
-		for i in range(1, P.size()):
-			if rotate(A[H[-1]], A[P[right]], A[P[i]]) < 0:
-				right = i
-		
-		if P[right] == H[0]:
-			break
-		else:
-			H.append(P[right])
-			P.remove_at(right)
-	return H
-	
+		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			var mouse_pos = event.global_position
+			for i in range(points.size()):
+				if mouse_pos.distance_to(points[i]) <= point_radius+5:
+					points.remove_at(i)
+					queue_redraw()
+					return
+		elif event.button_index == MOUSE_BUTTON_MIDDLE and event.pressed:
+			var mouse_pos = event.global_position
+			for i in range(points.size()):
+				if mouse_pos.distance_to(points[i]) <= point_radius+5:
+					selected_point = i
+					queue_redraw()
+					return
+		elif event.button_index == MOUSE_BUTTON_MIDDLE and not event.pressed:
+			selected_point = -1
+	elif event is InputEventMouseMotion and selected_point >= 0:
+		var mouse_pos = event.global_position
+		points[selected_point] = mouse_pos
+		queue_redraw()
