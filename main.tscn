@@ -13,9 +13,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_bue1h")
-point_radius = 5
+point_radius = 15
 point_color = Color(0.92549, 0.0941176, 0.0823529, 1)
-line_width = 3
+line_width = 8
 line_color = Color(0.117822, 0.434153, 0.977816, 1)
 
 [node name="Panel" type="Panel" parent="."]

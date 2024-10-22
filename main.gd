@@ -9,6 +9,9 @@ extends Control
 
 var points = []
 var selected_point = -1
+const DOUBLETAP_DELAY = 0.25
+var doubletap_time = DOUBLETAP_DELAY
+var last_keycode = 0
 
 
 func _draw():
@@ -69,27 +72,32 @@ func jarvis_march():
 	return convex_hull
 
 
+func _process(delta):
+	doubletap_time -= delta
+
+
 func _on_panel_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			var mouse_pos = event.global_position
-			points.append(mouse_pos)
-			queue_redraw()
-		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-			var mouse_pos = event.global_position
+			if doubletap_time >= 0:
+				for i in range(points.size()):
+					if mouse_pos.distance_to(points[i]) <= point_radius+15:
+						points.remove_at(i)
+						queue_redraw()
+						doubletap_time = DOUBLETAP_DELAY
+						return
 			for i in range(points.size()):
-				if mouse_pos.distance_to(points[i]) <= point_radius+5:
-					points.remove_at(i)
-					queue_redraw()
-					return
-		elif event.button_index == MOUSE_BUTTON_MIDDLE and event.pressed:
-			var mouse_pos = event.global_position
-			for i in range(points.size()):
-				if mouse_pos.distance_to(points[i]) <= point_radius+5:
+				if mouse_pos.distance_to(points[i]) <= point_radius+15:
 					selected_point = i
+					doubletap_time = DOUBLETAP_DELAY
 					queue_redraw()
 					return
-		elif event.button_index == MOUSE_BUTTON_MIDDLE and not event.pressed:
+			
+			points.append(mouse_pos)
+			doubletap_time = DOUBLETAP_DELAY
+			queue_redraw()
+		elif event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 			selected_point = -1
 	elif event is InputEventMouseMotion and selected_point >= 0:
 		var mouse_pos = event.global_position
