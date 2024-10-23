@@ -9,3 +9,7 @@ glow_strength = 1.32
 glow_bloom = 0.17
 glow_blend_mode = 1
 glow_hdr_threshold = 0.79
+adjustment_enabled = true
+adjustment_brightness = 1.25
+adjustment_contrast = 1.08
+adjustment_saturation = 1.17

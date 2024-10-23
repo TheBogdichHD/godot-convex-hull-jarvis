@@ -11,7 +11,6 @@ var points = []
 var selected_point = -1
 const DOUBLETAP_DELAY = 0.25
 var doubletap_time = DOUBLETAP_DELAY
-var last_keycode = 0
 
 
 func _draw():
@@ -29,6 +28,7 @@ func _draw():
 	
 	for point in points:
 		draw_circle(point, point_radius, point_color)
+	draw_circle(points[convex_hull[0]], point_radius, Color.AQUA)
 
 
 func calculate_orientation(p, q, r):
@@ -47,6 +47,12 @@ func jarvis_march():
 			var temp = point_indices[i]
 			point_indices[i] = point_indices[0]
 			point_indices[0] = temp
+		elif points[point_indices[i]].x == points[point_indices[0]].x:
+			if points[point_indices[i]].y > points[point_indices[0]].y:
+				var temp = point_indices[i]
+				point_indices[i] = point_indices[0]
+				point_indices[0] = temp
+	
 	
 	var convex_hull = [point_indices[0]]
 	
@@ -60,7 +66,7 @@ func jarvis_march():
 			if calculate_orientation(
 					points[convex_hull[-1]], 
 					points[point_indices[rightmost]], 
-					points[point_indices[i]]) < 0:
+					points[point_indices[i]]) > 0:
 				rightmost = i
 		
 		if point_indices[rightmost] == convex_hull[0]:
