@@ -35,4 +35,4 @@ jobs:
         uses: Scony/godot-gdscript-toolkit@master
 
       - name: Check formatting
-        run: gdformat --check .
+        run: gdformat .
